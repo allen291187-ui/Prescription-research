@@ -102,7 +102,15 @@ function tryNextImage(img) {
 
 function imageBlock(c) {
   const items = imageItems(c);
-  if (!items.length) return '';
+
+  if (!items.length) {
+    return `<div class="section">
+      <div class="section-title">案例圖片</div>
+      <div class="section-body">
+        <div class="image-empty">尚未上傳案例圖片</div>
+      </div>
+    </div>`;
+  }
 
   const gallery = items.map((item, idx) => {
     const candidates = encodeURIComponent(JSON.stringify(item.candidates));
@@ -220,9 +228,6 @@ function rowsToCases(rows) {
   return rows.slice(1).filter(row => row.some(Boolean)).map(row => {
     const c = {};
     headers.forEach((h, idx) => { c[h] = row[idx] ?? ''; });
-    c.異動重點 = parseStructured(c.異動重點);
-    c.修正前處方 = parseStructured(c.修正前處方);
-    c.修正後處方 = parseStructured(c.修正後處方);
     return c;
   }).filter(c => normalize(c.是否顯示) === '顯示');
 }
@@ -270,7 +275,7 @@ function openCase(caseId) {
   if (!c) return;
   const keyword = normalize(q.value);
   modalTitle.innerHTML = `<div class="meta"><span class="badge">${esc(c.案例編號)}</span><span class="badge ${c.類型 === '錯誤醫囑' ? 'err' : 'q'}">${esc(c.類型)}</span><span class="badge">${esc(c.問題分類)}</span></div><h2 id="modalHeading">${highlight(c.學名, keyword)}${c.商品名 ? ` <span class="drug">(${highlight(c.商品名, keyword)})</span>` : ''}</h2><div class="row"><span class="label">科別</span>${esc(c.科別)}　<span class="label">年度季別</span>${esc(c.年度)}${esc(c.季度)}</div>`;
-  modalBody.innerHTML = `${imageBlock(c)}<div class="section"><div class="section-title">案例摘要</div><div class="section-body">${esc(c.案例摘要)}</div></div><div class="section"><div class="section-title">問題內容</div><div class="section-body">${esc(c.問題內容)}</div></div>${rxBlock(c)}<div class="section"><div class="section-title">原始全文</div><div class="section-body"><div class="prebox">${esc(c.原始全文)}</div></div></div>${tagBlock(c, keyword)}<div class="section"><div class="section-title">資料來源</div><div class="section-body">${esc(c.資料來源)}</div></div>`;
+  modalBody.innerHTML = `${imageBlock(c)}<div class="section"><div class="section-title">案例摘要</div><div class="section-body">${esc(c.案例摘要)}</div></div><div class="section"><div class="section-title">問題內容</div><div class="section-body">${esc(c.問題內容)}</div></div><div class="section"><div class="section-title">原始全文</div><div class="section-body"><div class="prebox">${esc(c.原始全文)}</div></div></div>${tagBlock(c, keyword)}<div class="section"><div class="section-title">資料來源</div><div class="section-body">${esc(c.資料來源)}</div></div>`;
   modalBackdrop.classList.add('show');
   document.body.classList.add('modal-open');
 }
