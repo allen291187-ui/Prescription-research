@@ -3,14 +3,14 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>疑義處方知識庫搜尋系統 v2.0</title>
+<title>疑義處方知識庫搜尋系統 v3.0</title>
 <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 <header>
   <div class="wrap">
-    <h1>疑義處方知識庫搜尋系統 v2.0</h1>
-    <div class="sub">資料範圍：錯誤醫囑114Q1～115Q1｜可離線使用｜搜尋、篩選、放大閱讀、處方異動比較</div>
+    <h1>疑義處方知識庫搜尋系統 v3.0</h1>
+    <div class="sub">資料來源：Google Sheet｜搜尋範圍：學名、商品名、問題分類、關鍵字｜資料更新後重新整理網站即可同步</div>
   </div>
 </header>
 
@@ -24,8 +24,6 @@
     </div>
     <div class="tools">
       <button onclick="resetFilters()" class="toolbtn">清除條件</button>
-      <button onclick="downloadJSON()" class="toolbtn">匯出 JSON</button>
-      <button onclick="copyCSV()" class="toolbtn">複製 CSV</button>
       <span id="count" style="color:#667085"></span>
     </div>
     <div class="stats" id="stats"></div>
@@ -44,7 +42,7 @@
   </div>
 </div>
 
-<footer>v2.0｜錯誤醫囑顯示修正前/後處方與異動重點；疑義處方顯示完整原始全文；關鍵字置於原始全文下方</footer>
+<footer>v3.0｜資料由 Google Sheet 載入；僅「顯示」案例呈現；最新案例自動排在最上方</footer>
 
 <script src="script.js" defer></script>
 </body>
