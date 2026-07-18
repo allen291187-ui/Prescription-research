@@ -2,7 +2,7 @@
 
 const SHEET_ID = '1UVMKbjxuDUr4b6hPjztMBlApq60wZoeuchMEgaEePLY';
 const SHEET_NAME = '工作表1';
-const SHEET_CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(SHEET_NAME)}`;
+const SHEET_CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(SHEET_NAME)}&_=${Date.now()}`;
 
 let cases = [];
 const searchFields = ['學名', '商品名', '問題分類', '關鍵字'];
@@ -55,22 +55,75 @@ function splitImageLinks(value) {
     .filter(Boolean);
 }
 
-function toDisplayImageUrl(url) {
+function getDriveFileId(url) {
   const raw = String(url || '').trim();
-  if (!raw) return '';
-  const idMatch = raw.match(/\/file\/d\/([a-zA-Z0-9_-]+)/) || raw.match(/[?&]id=([a-zA-Z0-9_-]+)/);
-  if (idMatch) return `https://drive.google.com/thumbnail?id=${encodeURIComponent(idMatch[1])}&sz=w1600`;
-  return raw;
+  const match =
+    raw.match(/\/file\/d\/([a-zA-Z0-9_-]+)/) ||
+    raw.match(/[?&]id=([a-zA-Z0-9_-]+)/) ||
+    raw.match(/\/d\/([a-zA-Z0-9_-]+)/);
+  return match ? match[1] : '';
 }
 
-function imageUrls(c) {
-  return splitImageLinks(c.圖片).map(toDisplayImageUrl).filter(Boolean);
+function imageCandidates(url) {
+  const raw = String(url || '').trim();
+  if (!raw) return [];
+  const id = getDriveFileId(raw);
+  if (!id) return [raw];
+
+  // Multiple public Google Drive image endpoints are provided because
+  // availability can differ between browsers and deployments.
+  return [
+    `https://lh3.googleusercontent.com/d/${encodeURIComponent(id)}=w1600`,
+    `https://drive.google.com/thumbnail?id=${encodeURIComponent(id)}&sz=w1600`,
+    `https://drive.google.com/uc?export=view&id=${encodeURIComponent(id)}`
+  ];
+}
+
+function imageItems(c) {
+  return splitImageLinks(c.圖片).map(raw => ({
+    original: raw,
+    candidates: imageCandidates(raw)
+  })).filter(item => item.candidates.length);
+}
+
+function tryNextImage(img) {
+  let candidates = [];
+  try {
+    candidates = JSON.parse(decodeURIComponent(img.dataset.candidates || '[]'));
+  } catch (_) {}
+  const nextIndex = Number(img.dataset.index || 0) + 1;
+  if (nextIndex < candidates.length) {
+    img.dataset.index = String(nextIndex);
+    img.src = candidates[nextIndex];
+    return;
+  }
+  img.closest('.case-image-item')?.classList.add('image-failed');
 }
 
 function imageBlock(c) {
-  const urls = imageUrls(c);
-  if (!urls.length) return '';
-  return `<div class="section"><div class="section-title">案例圖片</div><div class="section-body"><div class="case-gallery">${urls.map((url, idx) => `<button class="case-image-button" type="button" onclick="event.stopPropagation(); openImageViewer('${esc(url)}')" aria-label="放大案例圖片 ${idx + 1}"><img src="${esc(url)}" alt="案例圖片 ${idx + 1}" loading="lazy" onerror="this.closest('button').style.display='none'" /></button>`).join('')}</div></div></div>`;
+  const items = imageItems(c);
+  if (!items.length) return '';
+
+  const gallery = items.map((item, idx) => {
+    const candidates = encodeURIComponent(JSON.stringify(item.candidates));
+    const first = item.candidates[0];
+    return `<div class="case-image-item">
+      <button class="case-image-button" type="button"
+              onclick="event.stopPropagation(); openImageViewer(this.querySelector('img').src)"
+              aria-label="放大案例圖片 ${idx + 1}">
+        <img src="${esc(first)}"
+             data-candidates="${candidates}"
+             data-index="0"
+             alt="案例圖片 ${idx + 1}"
+             loading="lazy"
+             referrerpolicy="no-referrer"
+             onerror="tryNextImage(this)" />
+      </button>
+      <a class="image-open-link" href="${esc(item.original)}" target="_blank" rel="noopener">在 Google Drive 開啟圖片</a>
+    </div>`;
+  }).join('');
+
+  return `<div class="section"><div class="section-title">案例圖片</div><div class="section-body"><div class="case-gallery">${gallery}</div></div></div>`;
 }
 
 function openImageViewer(url) {
