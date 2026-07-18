@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>疑義處方知識庫搜尋系統 v3.1</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <h1>疑義處方知識庫搜尋系統 v3.1</h1>
+    <div class="sub">資料來源：Google Sheet｜搜尋範圍：學名、商品名、問題分類、關鍵字｜資料更新後重新整理網站即可同步</div>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="panel">
+    <div class="searchbar">
+      <input id="q" placeholder="輸入藥物學名、商品名、關鍵字，例如：Vancomycin、Linezolid、RINA、CIPN、Q6H" autofocus />
+      <select id="type"><option value="">全部類型</option></select>
+      <select id="year"><option value="">全部年度</option></select>
+      <select id="category"><option value="">全部分類</option></select>
+    </div>
+    <div class="tools">
+      <button onclick="resetFilters()" class="toolbtn">清除條件</button>
+      <span id="count" style="color:#667085"></span>
+    </div>
+    <div class="stats" id="stats"></div>
+  </section>
+
+  <section id="results" class="grid"></section>
+</main>
+
+<div class="modal-backdrop" id="modalBackdrop" onclick="backdropClose(event)">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalHeading">
+    <div class="modal-head">
+      <div class="modal-title" id="modalTitle"></div>
+      <button class="closebtn" onclick="closeModal()">關閉 ✕</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+
+<div class="image-viewer" id="imageViewer" onclick="closeImageViewer(event)">
+  <button class="image-viewer-close" type="button" onclick="closeImageViewer(event)">關閉 ✕</button>
+  <img id="imageViewerImg" alt="案例圖片放大檢視" />
+</div>
+
+<footer>v3.1｜資料由 Google Sheet 載入｜案例詳細視窗支援 Google Drive 圖片</footer>
+
+<script src="script.js" defer></script>
+</body>
+</html>
